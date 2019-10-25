@@ -1,0 +1,129 @@
+//PHP
+//1.
+<?php 
+function ex00 ($arry){
+	$sum = array_sum($arry);
+    return $sum;
+}
+//2.
+<?php            
+function ex01($number){
+	$lop = false;
+  	$ck =  substr($number,0,1);
+	if($ck=='-'){
+		$lop = true;
+		$number = substr($number,1);
+	}
+	if(strpos($number,".")){
+		if(substr($number,strpos($number,".")+1,1)>=5){
+		$number = substr($number,0,strpos($number,".")); 
+		$number = $number+1; 	
+	}else{
+		$number = substr($number,0,strpos($number,".")); 
+	}
+	}
+	$sum = 0;
+	do {
+      $sum += $number % 10;
+    }while ($number = (int) $number / 10);
+	if($lop==true){
+	$sum  = '-'.$sum ;
+	}
+    return $sum;
+}
+//3.
+<?php  
+function ex02($A,$B){
+	$X = array();
+	for($i=0;$i<$A;$i++){
+			if($A%($i+1)==$B){
+				array_push($X,$i+1);
+			}
+	}
+    return $X;
+}
+//4.
+<?php
+function ex03($X,$K, $Arry){
+	$val_arry = array();
+	$check = array();
+	for($i=0;$i<count($Arry);$i++){
+		$check[$i] = array();
+		$check[$i]['diff'] = $Arry[$i] - $X;
+		$check[$i]['value'] = $Arry[$i];
+		if($check[$i]['diff'] <0){
+			$check[$i]['diff']  = $check[$i]['diff'] *(-1);	
+		}
+	}
+	$loop = true;
+	while($loop){
+		$loop = false;
+		for($i=0;$i<count($Arry)-1;$i++){
+			if($check[$i]['diff'] >$check[$i+1]['diff']){
+				$loop = true;
+				$tmp = $check[$i];
+				$check[$i] = $check[$i+1];
+				$check[$i+1] = $tmp; 
+			}
+		}
+	}
+	for($i=0;$i<$K;$i++){
+			$val_arry[$i] = $check[$i]['value']; 
+	}
+    return $val_arry;
+}
+
+//sql
+//1.
+SELECT ss.std_code ,ss.std_prefix , ss.std_first_name ,	ss.std_last_name ,sp.pos_name 
+FROM se_student AS ss
+LEFT JOIN se_position AS sp
+ON ss.std_pos_id = sp.pos_id
+LEFT JOIN se_team AS st
+ON ss.std_team_id = st.team_id
+WHERE st.team_name = 06
+ORDER BY sp.pos_name DESC
+//2.
+SELECT ss.std_code	, ss.std_prefix ,	ss.std_first_name	, ss.std_last_name	, ss.std_team_id	, ss.std_gender, 	ss.std_age
+FROM se_student AS ss
+WHERE ss.std_gender = 'M' 
+	AND ss.std_age BETWEEN 20 AND 30
+ORDER BY CONVERT( ss.std_first_name USING tis620 ) ASC
+//3.
+SELECT ss.std_code ,ss.std_prefix , ss.std_first_name ,	ss.std_last_name ,sp.pos_name 
+FROM se_student AS ss
+LEFT JOIN se_position AS sp
+ON ss.std_pos_id = sp.pos_id
+LEFT JOIN se_team AS st
+ON ss.std_team_id = st.team_id 
+WHERE st.team_name = 06 
+HAVING sp.pos_name LIKE '%Manager%' OR sp.pos_name LIKE '%Leader%'
+ORDER BY ss.std_code
+//4.
+SELECT st.team_name ,st.team_sys_name , count(ss.std_code) AS student_count , AVG(ss.std_age) AS avg_age , MAX(ss.std_age) AS max_age , MIN(ss.std_age) AS min_age
+FROM se_student AS ss
+LEFT JOIN se_position AS sp
+ON ss.std_pos_id = sp.pos_id
+LEFT JOIN se_team AS st
+ON ss.std_team_id = st.team_id 
+GROUP BY st.team_name
+HAVING AVG(ss.std_age) = 24.00
+//5.
+SELECT sc.coach_prefix , sc.coach_first_name , sc.coach_last_name	, sc.coach_nick_name	,st.team_id	,(case when count(ss.std_id) IS NULL THEN 0 ELSE count(ss.std_id) END) AS num_student
+FROM se_coach AS sc
+LEFT JOIN se_team AS st
+ON sc.coach_id = st.team_coach_id
+LEFT JOIN se_student AS ss
+ON ss.std_team_id = st.team_id
+GROUP BY sc.coach_id
+ORDER BY `st`.`team_id`  ASC
+//6.
+SELECT st.team_name ,st.team_sys_name , count(ss.std_code) AS sum_student ,SUM(CASE WHEN ss.std_gender LIKE 'M' THEN 1 ELSE 0 END) AS male 
+	, SUM(CASE WHEN ss.std_gender LIKE 'F' THEN 1 ELSE 0 END) AS female
+FROM se_student AS ss
+LEFT JOIN se_position AS sp
+ON ss.std_pos_id = sp.pos_id
+LEFT JOIN se_team AS st
+ON ss.std_team_id = st.team_id 
+GROUP BY st.team_name
+
